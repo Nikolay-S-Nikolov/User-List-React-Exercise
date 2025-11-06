@@ -3,7 +3,7 @@ import TableThead from "./TableThead.jsx";
 import UserItem from "./UserItem.jsx";
 import UserService from "../services/UserService.js";
 
-export default function Table() {
+export default function Table({ onDetailsClick }) {
     const [users, setUsers] = useState([])
 
     useEffect(() => {
@@ -90,6 +90,7 @@ export default function Table() {
                     {users.map(user => <UserItem
                         key={user._id}
                         userData={user}
+                        onUserDetailsClick={onDetailsClick}
                     />)}
                 </tbody>
             </table>
