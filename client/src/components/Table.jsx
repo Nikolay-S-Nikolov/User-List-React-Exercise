@@ -1,7 +1,18 @@
+import { useEffect, useState } from "react";
 import TableThead from "./TableThead.jsx";
 import UserItem from "./UserItem.jsx";
+import UserService from "../services/UserService.js";
 
 export default function Table() {
+    const [users, setUsers] = useState([])
+
+    useEffect(() => {
+        UserService.getAll()
+            .then(result => {
+                setUsers(result)
+            });
+    }, []);
+
     return (
         <div className="table-wrapper">
             {/* <!--  Overlap components  --> */}
@@ -76,7 +87,10 @@ export default function Table() {
             <table className="table">
                 <TableThead />
                 <tbody>
-                    <UserItem />
+                    {users.map(user => <UserItem
+                        key={user._id}
+                        userData={user}
+                    />)}
                 </tbody>
             </table>
         </div>
