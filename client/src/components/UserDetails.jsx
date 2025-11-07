@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import UserService from "../services/UserService.js";
+import userService from "../services/userService.js";
 import { fromIsoDate } from "../utils/fromIsoDate.js";
 
 export default function UserDetails({ userId, onClose }) {
     const [user, setUser] = useState({});
 
     useEffect(() => {
-        UserService.getOne(userId)
+        userService.getOne(userId)
             .then(result => {
                 setUser(result);
             });

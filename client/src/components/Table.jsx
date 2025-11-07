@@ -1,17 +1,7 @@
-import { useEffect, useState } from "react";
 import TableThead from "./TableThead.jsx";
 import UserItem from "./UserItem.jsx";
-import UserService from "../services/UserService.js";
 
-export default function Table({ onDetailsClick }) {
-    const [users, setUsers] = useState([])
-
-    useEffect(() => {
-        UserService.getAll()
-            .then(result => {
-                setUsers(result)
-            });
-    }, []);
+export default function Table({ onDetailsClick, users, onEditClick }) {
 
     return (
         <div className="table-wrapper">
@@ -91,6 +81,7 @@ export default function Table({ onDetailsClick }) {
                         key={user._id}
                         userData={user}
                         onUserDetailsClick={onDetailsClick}
+                        onEditClick={onEditClick}
                     />)}
                 </tbody>
             </table>

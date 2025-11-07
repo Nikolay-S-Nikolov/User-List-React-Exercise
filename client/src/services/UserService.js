@@ -8,9 +8,45 @@ export default {
         return users;
     },
 
-    async getOne(userId){
+    async getOne(userId) {
         const res = await fetch(`${baseUrl}/${userId}`);
         const user = await res.json()
         return user;
-    }
+    },
+
+    async create(userData) {
+        const data = transfromUserData(userData);
+        data.createdAt = new Date().toISOString();
+        const options = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        };
+        const response = await fetch(baseUrl, options);
+        const result = await response.json();
+        return result;
+    },
+
+    async edit(userData) {
+        const data = transfromUserData(userData);
+        const options = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        };
+        const response = await fetch(`${baseUrl}/${userData._id}`, options);
+        const result = await response.json();
+        return result;
+    },
+}
+
+function transfromUserData(userData) {
+    const { country, city, street, streetNumber, ...transformedData } = userData;
+    transformedData.address = { country, city, street, streetNumber };
+    transformedData.updatedAt = new Date().toISOString();
+    return transformedData;
 }

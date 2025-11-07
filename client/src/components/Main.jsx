@@ -1,16 +1,61 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Table from "./Table.jsx";
 import UserDetails from "./UserDetails.jsx";
+import UserCreateEdit from "./UserCreateEdit.jsx";
+import userService from "../services/userService.js";
 
 export default function Main() {
+    const [users, setUsers] = useState([]);
     const [userIdForDetails, setUserDetails] = useState(null);
+    const [createUser, setCreateUser] = useState(false);
+    const [userIdForEdit, setUserIdForEdit] = useState(null);
+
+    useEffect(() => {
+        userService.getAll()
+            .then(result => {
+                setUsers(result);
+            });
+    }, []);
+
     function onShowDetatils(user) {
         setUserDetails(user);
     };
 
+    function onShowCloseCreateUser() {
+        setCreateUser(state => !state);
+    }
+
     function onDetailsCloseHandler() {
         setUserDetails(null);
     };
+
+    async function onCreateUser(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target.parentElement.parentElement);
+        const userData = Object.fromEntries(formData);
+        const newUser = await userService.create(userData);
+        setUsers(state => [...state, newUser]);
+        setCreateUser(state => !state);
+    }
+
+    function onShowEdit(id) {
+        setUserIdForEdit(id);
+    }
+
+    function onHideEdit() {
+        setUserIdForEdit(null);
+    }
+
+    async function onEditUser(e, userId, createdAt) {
+        e.preventDefault();
+        const formData = new FormData(e.target.parentElement.parentElement);
+        const userData = Object.fromEntries(formData);
+        userData._id = userId;
+        userData.createdAt = createdAt;
+        const editedUser = await userService.edit(userData);
+        setUsers(state => state.map(user => user._id == editedUser._id ? editedUser : user));
+        setUserIdForEdit(null);
+    }
 
     return (
         <main className="main">
@@ -28,11 +73,13 @@ export default function Main() {
                     </h2>
                 </div>
 
-                <Table onDetailsClick={onShowDetatils} />
+                <Table onDetailsClick={onShowDetatils} users={users} onEditClick={onShowEdit} />
                 {userIdForDetails && <UserDetails userId={userIdForDetails} onClose={onDetailsCloseHandler} />}
+                {createUser && <UserCreateEdit onClose={onShowCloseCreateUser} createUserHandler={onCreateUser} />}
+                {userIdForEdit && <UserCreateEdit onClose={onHideEdit} userId={userIdForEdit} editUserHandler={onEditUser} />}
 
                 {/* <!--  New user button  --> */}
-                <button className="btn-add btn">Add new user</button>
+                <button className="btn-add btn" onClick={onShowCloseCreateUser}>Add new user</button>
 
                 {/* <!--  Pagination component  --> */}
                 <div className="pagination position">
