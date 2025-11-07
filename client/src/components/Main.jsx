@@ -12,14 +12,16 @@ export default function Main() {
     const [createUser, setCreateUser] = useState(false);
     const [userIdForEdit, setUserIdForEdit] = useState(null);
     const [userIdForDelete, setUserIdForDelete] = useState(null);
-    const [limit, setLimit] = useState(5)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [limit, setLimit] = useState(5);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortField, setSortField] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState('asc')
 
     const startIndex = (currentPage - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedUsers = users.slice(startIndex, endIndex);
-    const total = users.length
-    const totalPages = Math.ceil(total / limit)
+    const total = users.length;
+    const totalPages = Math.ceil(total / limit);
 
     useEffect(() => {
         userService.getAll()
@@ -80,7 +82,28 @@ export default function Main() {
         e.preventDefault();
         await userService.delete(userId);
         setUsers(state => state.filter(user => user._id != userId));
-        setUserIdForDelete(null)
+        setUserIdForDelete(null);
+    }
+
+    function handleSortChange(fieldName) {
+        setUsers(prevUsers => {
+            let newOrder = 'asc';
+            if (fieldName === sortField) {
+                newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                setSortOrder(newOrder);
+            } else {
+                setSortField(fieldName);
+                setSortOrder('asc');
+            }
+
+            const sortedUsers = [...prevUsers].sort((a, b) =>
+                newOrder === 'asc'
+                    ? a[fieldName].localeCompare(b[fieldName])
+                    : b[fieldName].localeCompare(a[fieldName])
+            );
+
+            return sortedUsers;
+        });
     }
 
     return (
@@ -99,7 +122,17 @@ export default function Main() {
                     </h2>
                 </div>
 
-                <Table onDetailsClick={onShowDetatils} users={paginatedUsers} onEditClick={onShowEdit} onDeleteClick={onShowDelete} />
+                <Table
+                    onDetailsClick={onShowDetatils}
+                    users={paginatedUsers}
+                    onEditClick={onShowEdit}
+                    onDeleteClick={onShowDelete}
+                    // ontableSort={[setSortField, setSortOrder, handleSortChange, sortOrder, sortField]}
+                    handleSortChange={handleSortChange}
+                    sortOrder={sortOrder}
+                    sortField={sortField}
+                />
+
                 {userIdForDetails && <UserDetails userId={userIdForDetails} onClose={onDetailsCloseHandler} />}
                 {createUser && <UserCreateEdit onClose={onShowCloseCreateUser} createUserHandler={onCreateUser} />}
                 {userIdForEdit && <UserCreateEdit onClose={onHideEdit} userId={userIdForEdit} editUserHandler={onEditUser} />}
@@ -108,7 +141,17 @@ export default function Main() {
                 {/* <!--  New user button  --> */}
                 <button className="btn-add btn" onClick={onShowCloseCreateUser}>Add new user</button>
 
-                <Pagination limit={limit} setLimit={setLimit} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} start={startIndex} end={endIndex} total={total} />
+                <Pagination
+                    limit={limit}
+                    setLimit={setLimit}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalPages={totalPages}
+                    start={startIndex}
+                    end={endIndex}
+                    total={total}
+                />
+
             </section>
         </main>
     );

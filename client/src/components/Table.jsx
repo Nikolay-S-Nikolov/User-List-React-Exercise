@@ -1,7 +1,13 @@
 import TableThead from "./TableThead.jsx";
 import UserItem from "./UserItem.jsx";
 
-export default function Table({ onDetailsClick, users, onEditClick, onDeleteClick }) {
+export default function Table({
+    onDetailsClick,
+    users,
+    onEditClick,
+    onDeleteClick,
+    handleSortChange, sortOrder, sortField
+}) {
 
     return (
         <div className="table-wrapper">
@@ -75,7 +81,12 @@ export default function Table({ onDetailsClick, users, onEditClick, onDeleteClic
             {/* <!--  </div> --> */}
 
             <table className="table">
-                <TableThead />
+                <TableThead
+                    handleSortChange={handleSortChange}
+                    sortOrder={sortOrder}
+                    sortField={sortField}
+                />
+
                 <tbody>
                     {users.map(user => <UserItem
                         key={user._id}
