@@ -1,7 +1,7 @@
 import TableThead from "./TableThead.jsx";
 import UserItem from "./UserItem.jsx";
 
-export default function Table({ onDetailsClick, users, onEditClick }) {
+export default function Table({ onDetailsClick, users, onEditClick, onDeleteClick }) {
 
     return (
         <div className="table-wrapper">
@@ -82,6 +82,7 @@ export default function Table({ onDetailsClick, users, onEditClick }) {
                         userData={user}
                         onUserDetailsClick={onDetailsClick}
                         onEditClick={onEditClick}
+                        onDeleteClick={onDeleteClick}
                     />)}
                 </tbody>
             </table>

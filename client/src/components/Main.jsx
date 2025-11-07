@@ -3,12 +3,15 @@ import Table from "./Table.jsx";
 import UserDetails from "./UserDetails.jsx";
 import UserCreateEdit from "./UserCreateEdit.jsx";
 import userService from "../services/userService.js";
+import Pagination from "./Pagination.jsx";
+import UserDelete from "./UserDelete.jsx";
 
 export default function Main() {
     const [users, setUsers] = useState([]);
     const [userIdForDetails, setUserDetails] = useState(null);
     const [createUser, setCreateUser] = useState(false);
     const [userIdForEdit, setUserIdForEdit] = useState(null);
+    const [userIdForDelete, setUserIdForDelete] = useState(null);
 
     useEffect(() => {
         userService.getAll()
@@ -46,6 +49,14 @@ export default function Main() {
         setUserIdForEdit(null);
     }
 
+    function onShowDelete(id) {
+        setUserIdForDelete(id);
+    }
+
+    function onHideDelete() {
+        setUserIdForDelete(null);
+    }
+
     async function onEditUser(e, userId, createdAt) {
         e.preventDefault();
         const formData = new FormData(e.target.parentElement.parentElement);
@@ -55,6 +66,13 @@ export default function Main() {
         const editedUser = await userService.edit(userData);
         setUsers(state => state.map(user => user._id == editedUser._id ? editedUser : user));
         setUserIdForEdit(null);
+    }
+
+    async function onDeleteUser(e, userId) {
+        e.preventDefault();
+        await userService.delete(userId);
+        setUsers(state => state.filter(user => user._id != userId));
+        setUserIdForDelete(null)
     }
 
     return (
@@ -73,198 +91,17 @@ export default function Main() {
                     </h2>
                 </div>
 
-                <Table onDetailsClick={onShowDetatils} users={users} onEditClick={onShowEdit} />
+                <Table onDetailsClick={onShowDetatils} users={users} onEditClick={onShowEdit} onDeleteClick={onShowDelete} />
                 {userIdForDetails && <UserDetails userId={userIdForDetails} onClose={onDetailsCloseHandler} />}
                 {createUser && <UserCreateEdit onClose={onShowCloseCreateUser} createUserHandler={onCreateUser} />}
                 {userIdForEdit && <UserCreateEdit onClose={onHideEdit} userId={userIdForEdit} editUserHandler={onEditUser} />}
+                {userIdForDelete && <UserDelete onClose={onHideDelete} userId={userIdForDelete} onDeleteHandler={onDeleteUser} />}
 
                 {/* <!--  New user button  --> */}
                 <button className="btn-add btn" onClick={onShowCloseCreateUser}>Add new user</button>
 
-                {/* <!--  Pagination component  --> */}
-                <div className="pagination position">
-                    <div className="limits">
-                        <span>Items per page:</span>
-                        <select name="limit" className="limit" defaultValue="5">
-                            <option defaultValue="5">5</option>
-                            <option defaultValue="5">10</option>
-                            <option defaultValue="5">15</option>
-                            <option defaultValue="5">20</option>
-                        </select>
-                    </div>
-                    <p className="pages">1 - 1 of 1</p>
-                    <div className="actions">
-                        <button className="btn" title="First Page">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="angles-left"
-                                className="svg-inline--fa fa-angles-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                                <path fill="currentColor"
-                                    d="M77.25 256l137.4-137.4c12.5-12.5 12.5-32.75 0-45.25s-32.75-12.5-45.25 0l-160 160c-12.5 12.5-12.5 32.75 0 45.25l160 160C175.6 444.9 183.8 448 192 448s16.38-3.125 22.62-9.375c12.5-12.5 12.5-32.75 0-45.25L77.25 256zM269.3 256l137.4-137.4c12.5-12.5 12.5-32.75 0-45.25s-32.75-12.5-45.25 0l-160 160c-12.5 12.5-12.5 32.75 0 45.25l160 160C367.6 444.9 375.8 448 384 448s16.38-3.125 22.62-9.375c12.5-12.5 12.5-32.75 0-45.25L269.3 256z">
-                                </path>
-                            </svg>
-                        </button>
-
-                        <button className="btn" title="Previous Page">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="angle-left"
-                                className="svg-inline--fa fa-angle-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512">
-                                <path fill="currentColor"
-                                    d="M192 448c-8.188 0-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25L77.25 256l137.4 137.4c12.5 12.5 12.5 32.75 0 45.25C208.4 444.9 200.2 448 192 448z">
-                                </path>
-                            </svg>
-                        </button>
-                        <button className="btn" title="Next Page">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="angle-right"
-                                className="svg-inline--fa fa-angle-right" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512">
-                                <path fill="currentColor"
-                                    d="M64 448c-8.188 0-16.38-3.125-22.62-9.375c-12.5-12.5-12.5-32.75 0-45.25L178.8 256L41.38 118.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l160 160c12.5 12.5 12.5 32.75 0 45.25l-160 160C80.38 444.9 72.19 448 64 448z">
-                                </path>
-                            </svg>
-                        </button>
-
-                        <button className="btn" title="Last Page">
-                            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="angles-right"
-                                className="svg-inline--fa fa-angles-right" role="img" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 448 512">
-                                <path fill="currentColor"
-                                    d="M246.6 233.4l-160-160c-12.5-12.5-32.75-12.5-45.25 0s-12.5 32.75 0 45.25L178.8 256l-137.4 137.4c-12.5 12.5-12.5 32.75 0 45.25C47.63 444.9 55.81 448 64 448s16.38-3.125 22.62-9.375l160-160C259.1 266.1 259.1 245.9 246.6 233.4zM438.6 233.4l-160-160c-12.5-12.5-32.75-12.5-45.25 0s-12.5 32.75 0 45.25L370.8 256l-137.4 137.4c-12.5 12.5-12.5 32.75 0 45.25C239.6 444.9 247.8 448 256 448s16.38-3.125 22.62-9.375l160-160C451.1 266.1 451.1 245.9 438.6 233.4z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                <Pagination />
             </section>
-
-            {/* <!--  Create/Edit Form component  --> */}
-            {/* <!--  <div className="overlay">
-                    <div className="backdrop"></div>
-                    <div className="modal">
-                        <div className="user-container">
-                            <header className="headers">
-                                <h2>Edit User/Add User</h2>
-                                <button className="btn close">
-                                    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="xmark"
-                                        className="svg-inline--fa fa-xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                        <path fill="currentColor"
-                                            d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </header>
-                            <form>
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label for="firstName">First name</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-user"></i></span>
-                                            <input id="firstName" name="firstName" type="text" />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label for="lastName">Last name</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-user"></i></span>
-                                            <input id="lastName" name="lastName" type="text" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label for="email">Email</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-envelope"></i></span>
-                                            <input id="email" name="email" type="text" />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label for="phoneNumber">Phone number</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-phone"></i></span>
-                                            <input id="phoneNumber" name="phoneNumber" type="text" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="form-group long-line">
-                                    <label for="imageUrl">Image Url</label>
-                                    <div className="input-wrapper">
-                                        <span><i className="fa-solid fa-image"></i></span>
-                                        <input id="imageUrl" name="imageUrl" type="text" />
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label for="country">Country</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-map"></i></span>
-                                            <input id="country" name="country" type="text" />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label for="city">City</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-city"></i></span>
-                                            <input id="city" name="city" type="text" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label for="street">Street</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-map"></i></span>
-                                            <input id="street" name="street" type="text" />
-                                        </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label for="streetNumber">Street number</label>
-                                        <div className="input-wrapper">
-                                            <span><i className="fa-solid fa-house-chimney"></i></span>
-                                            <input id="streetNumber" name="streetNumber" type="text" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="form-actions">
-                                    <button id="action-save" className="btn" type="submit">Save</button>
-                                    <button id="action-cancel" className="btn" type="button">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div> --> */}
-
-
-            {/* <!--  Delete user component  --> */}
-            {/* <!--  <div className="overlay">
-                    <div className="backdrop"></div>
-                    <div className="modal">
-                        <div className="confirm-container">
-                            <header className="headers">
-                                <h2>Are you sure you want to delete this account?</h2>
-                                <button className="btn close">
-                                    <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="xmark"
-                                        className="svg-inline--fa fa-xmark" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-                                        <path fill="currentColor"
-                                            d="M310.6 361.4c12.5 12.5 12.5 32.75 0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3L54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75 0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-105.4 105.4L310.6 361.4z">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </header>
-                            <div className="actions">
-                                <div id="form-actions">
-                                    <button id="action-save" className="btn" type="submit">Delete</button>
-                                    <button id="action-cancel" className="btn" type="button">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> --> */}
-
         </main>
     );
 };

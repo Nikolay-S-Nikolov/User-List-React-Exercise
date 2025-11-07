@@ -42,6 +42,13 @@ export default {
         const result = await response.json();
         return result;
     },
+
+    async delete(userId) {
+        const options = {
+            method: "DELETE",
+        };
+        await fetch(`${baseUrl}/${userId}`, options);
+    }
 }
 
 function transfromUserData(userData) {
