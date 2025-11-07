@@ -12,6 +12,14 @@ export default function Main() {
     const [createUser, setCreateUser] = useState(false);
     const [userIdForEdit, setUserIdForEdit] = useState(null);
     const [userIdForDelete, setUserIdForDelete] = useState(null);
+    const [limit, setLimit] = useState(5)
+    const [currentPage, setCurrentPage] = useState(1)
+
+    const startIndex = (currentPage - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedUsers = users.slice(startIndex, endIndex);
+    const total = users.length
+    const totalPages = Math.ceil(total / limit)
 
     useEffect(() => {
         userService.getAll()
@@ -91,7 +99,7 @@ export default function Main() {
                     </h2>
                 </div>
 
-                <Table onDetailsClick={onShowDetatils} users={users} onEditClick={onShowEdit} onDeleteClick={onShowDelete} />
+                <Table onDetailsClick={onShowDetatils} users={paginatedUsers} onEditClick={onShowEdit} onDeleteClick={onShowDelete} />
                 {userIdForDetails && <UserDetails userId={userIdForDetails} onClose={onDetailsCloseHandler} />}
                 {createUser && <UserCreateEdit onClose={onShowCloseCreateUser} createUserHandler={onCreateUser} />}
                 {userIdForEdit && <UserCreateEdit onClose={onHideEdit} userId={userIdForEdit} editUserHandler={onEditUser} />}
@@ -100,7 +108,7 @@ export default function Main() {
                 {/* <!--  New user button  --> */}
                 <button className="btn-add btn" onClick={onShowCloseCreateUser}>Add new user</button>
 
-                <Pagination />
+                <Pagination limit={limit} setLimit={setLimit} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} start={startIndex} end={endIndex} total={total} />
             </section>
         </main>
     );
