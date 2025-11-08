@@ -28,10 +28,11 @@ export default function SearchForm({ onSearchHandler }) {
                     onChange={(e) => setSearchText(e.target.value)}
                 />
                 {/* Show the clear button only if input field length !== 0 */}
-                <button className="btn close-btn" onClick={()=>setSearchText('')}>
-                    <i className="fa-solid fa-xmark"></i>
-                </button>
-
+                {searchText.length > 0 &&
+                    <button className="btn close-btn" onClick={() => setSearchText('')}>
+                        <i className="fa-solid fa-xmark"></i>
+                    </button>
+                }
                 <button className="btn" title="Please, select the search criteria">
                     <i className="fa-solid fa-magnifying-glass"></i>
                 </button>

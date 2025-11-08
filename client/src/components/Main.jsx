@@ -18,6 +18,10 @@ export default function Main() {
     const [sortField, setSortField] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState('asc');
     const [allUsers, setAllUsers] = useState([]);
+    const [showSpinner, setShowSpinner] = useState(false);
+    const [showNoUsers, setShowNoUsers] = useState(false);
+    const [showNoContent, setShowNoContent] = useState(false);
+    const [showFaildFetch, setShowFaildFetch] = useState(false);
 
 
     const startIndex = (currentPage - 1) * limit;
@@ -27,10 +31,22 @@ export default function Main() {
     const totalPages = Math.ceil(total / limit);
 
     useEffect(() => {
+        setShowSpinner(true);
         userService.getAll()
             .then(result => {
                 setUsers(result);
                 setAllUsers(result);
+                setShowSpinner(false);
+                if (result.length == 0) {
+                    setShowNoUsers(true);
+                } else {
+                    setShowNoUsers(false);
+                }
+            })
+            .catch((err) => {
+                setShowSpinner(false);
+                setShowFaildFetch(true);
+                console.log(err.message);
             });
     }, []);
 
@@ -53,6 +69,7 @@ export default function Main() {
         const newUser = await userService.create(userData);
         setUsers(state => [...state, newUser]);
         setCreateUser(state => !state);
+        if (showNoUsers) { setShowNoUsers(false); };
     }
 
     function onShowEdit(id) {
@@ -85,8 +102,10 @@ export default function Main() {
     async function onDeleteUser(e, userId) {
         e.preventDefault();
         await userService.delete(userId);
-        setUsers(state => state.filter(user => user._id != userId));
+        const updatedUsers = users.filter(user => user._id != userId)
+        setUsers(updatedUsers);
         setUserIdForDelete(null);
+        setShowNoUsers(updatedUsers.length == 0);
     }
 
     function handleSortChange(fieldName) {
@@ -112,33 +131,30 @@ export default function Main() {
 
     function handleSearch(e, searchText, searchCriteria) {
         e.preventDefault();
+        if (showNoContent) {
+            setShowNoContent(false);
+        }
 
         if (!searchCriteria || !searchText) {
             setUsers(allUsers);
             return;
         }
 
-        setUsers([...allUsers].filter(
+        const searchResult = [...allUsers].filter(
             (u) => u[searchCriteria].toLowerCase().includes(searchText.toLowerCase())
-        ));
+        )
+        setUsers(searchResult);
+
+        if (searchResult.length == 0) {
+            setShowNoContent(true);
+        }
+
     }
 
     return (
         <main className="main">
             <section className="card users-container">
                 <SearchForm onSearchHandler={handleSearch} />
-                {/* <div className="search-form">
-                    <h2>
-                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user"
-                            className="svg-inline--fa fa-user SearchBar_icon__cXpTg" role="img" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 448 512">
-                            <path fill="currentColor"
-                                d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z">
-                            </path>
-                        </svg>
-                        <span>Users</span>
-                    </h2>
-                </div> */}
 
                 <Table
                     onDetailsClick={onShowDetatils}
@@ -149,6 +165,10 @@ export default function Main() {
                     handleSortChange={handleSortChange}
                     sortOrder={sortOrder}
                     sortField={sortField}
+                    showSpinner={showSpinner}
+                    showNoUsers={showNoUsers}
+                    showNoContent={showNoContent}
+                    showFaildFetch={showFaildFetch}
                 />
 
                 {userIdForDetails && <UserDetails userId={userIdForDetails} onClose={onDetailsCloseHandler} />}
@@ -156,7 +176,6 @@ export default function Main() {
                 {userIdForEdit && <UserCreateEdit onClose={onHideEdit} userId={userIdForEdit} editUserHandler={onEditUser} />}
                 {userIdForDelete && <UserDelete onClose={onHideDelete} userId={userIdForDelete} onDeleteHandler={onDeleteUser} />}
 
-                {/* <!--  New user button  --> */}
                 <button className="btn-add btn" onClick={onShowCloseCreateUser}>Add new user</button>
 
                 <Pagination
