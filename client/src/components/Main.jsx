@@ -5,6 +5,7 @@ import UserCreateEdit from "./UserCreateEdit.jsx";
 import userService from "../services/userService.js";
 import Pagination from "./Pagination.jsx";
 import UserDelete from "./UserDelete.jsx";
+import SearchForm from "./searchForm.jsx";
 
 export default function Main() {
     const [users, setUsers] = useState([]);
@@ -15,7 +16,9 @@ export default function Main() {
     const [limit, setLimit] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortField, setSortField] = useState('createdAt');
-    const [sortOrder, setSortOrder] = useState('asc')
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [allUsers, setAllUsers] = useState([]);
+
 
     const startIndex = (currentPage - 1) * limit;
     const endIndex = startIndex + limit;
@@ -27,6 +30,7 @@ export default function Main() {
         userService.getAll()
             .then(result => {
                 setUsers(result);
+                setAllUsers(result);
             });
     }, []);
 
@@ -106,10 +110,24 @@ export default function Main() {
         });
     }
 
+    function handleSearch(e, searchText, searchCriteria) {
+        e.preventDefault();
+
+        if (!searchCriteria || !searchText) {
+            setUsers(allUsers);
+            return;
+        }
+
+        setUsers([...allUsers].filter(
+            (u) => u[searchCriteria].toLowerCase().includes(searchText.toLowerCase())
+        ));
+    }
+
     return (
         <main className="main">
             <section className="card users-container">
-                <div className="search-form">
+                <SearchForm onSearchHandler={handleSearch} />
+                {/* <div className="search-form">
                     <h2>
                         <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user"
                             className="svg-inline--fa fa-user SearchBar_icon__cXpTg" role="img" xmlns="http://www.w3.org/2000/svg"
@@ -120,7 +138,7 @@ export default function Main() {
                         </svg>
                         <span>Users</span>
                     </h2>
-                </div>
+                </div> */}
 
                 <Table
                     onDetailsClick={onShowDetatils}

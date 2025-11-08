@@ -27,7 +27,7 @@ export default function Pagination({
                     <option value="20">20</option>
                 </select>
             </div>
-            <p className="pages">{start + 1} - {end > total ? total : end} of {total}</p>
+            <p className="pages">{total > 0 ? start + 1 : 0} - {end > total ? total : end} of {total}</p>
             <div className="actions">
                 <button className="btn" title="First Page" onClick={() => setCurrentPage(1)}>
                     <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="angles-left"

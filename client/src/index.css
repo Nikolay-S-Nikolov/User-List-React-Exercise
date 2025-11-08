@@ -365,6 +365,9 @@ ul {
   display: flex;
   align-items: center;
 }
+.search-form h2 svg {
+  width: 1rem;
+}
 .search-form h2 > span {
   margin-left: 10px;
 }
